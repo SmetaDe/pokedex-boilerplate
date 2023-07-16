@@ -1,12 +1,47 @@
+// Import the necessary modules
 const express = require("express");
+const morgan = require("morgan");
+const pokeBank = require("./pokeBank");
 
+// Initialize the Express application
 const app = express();
+app.use(morgan("dev"));
 
-app.use(express.static("public"));
+// Define the homepage route
+app.get("/", (req, res) => {
+  const pokemonList = pokeBank.list();
+  let html = "<h1>Pokedex</h1>";
+  pokemonList.forEach((pokemon) => {
+    html += `<p><a href="/pokemon/${pokemon.id}">${pokemon.name}</a></p>`;
+  });
+  res.send(html);
+});
 
-app.get("/", (req, res) => res.send("Hello World!"));
+// Define the Pokemon details route
+app.get("/pokemon/:id", (req, res) => {
+  const pokemon = pokeBank.find(req.params.id);
+  if (!pokemon) {
+    res.status(404).send("Pokemon not found");
+  } else {
+    let html = `<h1>${pokemon.name}</h1>`;
+    html += `<p>Type: ${pokemon.type}</p>`;
+    html += `<p>Trainer: ${pokemon.trainer}</p>`;
+    html += `<p>Date: ${pokemon.date}</p>`;
+    res.send(html);
+  }
+});
 
+// Custom Error Hadling
+app.get("/pokemon/:id", (req, res) => {
+  const id = req.params.id;
+  const pokemon = find(id);
+  if (!pokemon.id) {
+    throw new Error("Not Found");
+  }
+});
+
+// Start the server
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`server is listening on port ${PORT}`);
+  console.log(`App listening in port ${PORT}`);
 });
